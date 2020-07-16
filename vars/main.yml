@@ -1,0 +1,5 @@
+---
+region: eu-central-1
+vpc_id: vpc-0923620215ba341ae
+nginx_ssh_key: test_kp
+inventory_ssh_key_path: "./{{ nginx_ssh_key }}.pem"

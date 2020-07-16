@@ -1,0 +1,9 @@
+---
+- name: Get subnet info
+  ec2_vpc_subnet_info:
+    subnet_ids: "{{ item.subnet }}"
+  register: vpc_subnet_info
+
+- name: Build nginx_conf_dict
+  set_fact:
+    nginx_conf_dict: '{{nginx_conf_dict|combine({vpc_subnet_info.subnets[0].availability_zone: []})}}'

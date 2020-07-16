@@ -1,0 +1,48 @@
+---
+# ====================================================================
+# What we have before
+- name: Check instance web_{{ item.seq_num }}
+  ec2_instance_info:
+    filters:
+      "tag:Name": web_{{ item.seq_num }}
+      instance-state-name: [ "running" ]
+  register: ec2_info
+
+- name: Provision
+  block:
+  - name: Provision instance web_{{ item.seq_num }}
+    ec2:
+        image: "{{ AMI.image_id }}"
+        instance_type: t2.micro
+        group_id: "{{ result_sec_group.group_id }}"
+        assign_public_ip: yes
+        vpc_subnet_id: "{{ item.subnet }}"
+        region: "{{ region }}"
+        key_name: "{{ nginx_ssh_key }}"
+        wait: true
+        instance_tags:
+          Name: "web_{{ item.seq_num }}"
+    register: ec2
+
+  - name: Add new instance to host group
+    add_host:
+      hostname: "{{ i.public_ip }}"
+      groupname: launched
+      ansible_ssh_user: ec2-user
+      ansible_ssh_private_key_file: "{{ inventory_ssh_key_path }}"
+    loop: "{{ ec2.instances }}"
+    loop_control:
+      loop_var: i
+
+  - name: Wait for SSH to come up 
+    wait_for:
+      port: 22
+      host: "{{ i.public_dns_name }}"
+      connect_timeout: 3
+      delay: 3
+      timeout: 30
+    loop: "{{ ec2.instances }}"
+    loop_control:
+      loop_var: i
+
+  when: ec2_info.instances | length == 0
