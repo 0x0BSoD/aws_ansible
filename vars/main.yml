@@ -1,5 +1,6 @@
 ---
 region: eu-central-1
-vpc_id: vpc-0923620215ba341ae
-nginx_ssh_key: test_kp
+vpc_id: vpc-0bf905f3886e25be5
+sg_id: sg-0950165d04e52ce55
+nginx_ssh_key: apps
 inventory_ssh_key_path: "./{{ nginx_ssh_key }}.pem"

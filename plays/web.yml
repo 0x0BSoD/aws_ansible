@@ -14,7 +14,7 @@
     ec2:
         image: "{{ AMI.image_id }}"
         instance_type: t2.micro
-        group_id: "{{ result_sec_group.group_id }}"
+        group_id: "{{ sg_id }}"
         assign_public_ip: yes
         vpc_subnet_id: "{{ item.subnet }}"
         region: "{{ region }}"

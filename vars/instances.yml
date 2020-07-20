@@ -1,22 +1,13 @@
 instances: 
   - name: app 
     subnets: 
-      - subnet: 'subnet-056a217b9205d54ab' 
+      - subnet: 'subnet-087623d4d6584c84f' 
         seq_num: '01' 
-      - subnet: 'subnet-056a217b9205d54ab' 
+      - subnet: 'subnet-087623d4d6584c84f' 
         seq_num: '02' 
-      - subnet: 'subnet-0ce82320ecd37865d' 
-        seq_num: '03' 
-      - subnet: 'subnet-0ce82320ecd37865d' 
-        seq_num: '04' 
-      - subnet: 'subnet-0cd2a8454a7c25f82' 
-        seq_num: '05'
-  
+
   - name: web 
     subnets: 
-      - subnet: 'subnet-0a69778c7286297ba' 
+      - subnet: 'subnet-06bd9df5b2ea4132e' 
         seq_num: '01' 
         assign_public_ip: true 
-      - subnet: 'subnet-0fa245b2406c11f87' 
-        seq_num: '02' 
-        assign_public_ip: true

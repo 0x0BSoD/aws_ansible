@@ -38,26 +38,6 @@
       when: item.name == "web"
 
     # ====================================================================
-    # allow 80/443 for work and 22 for debug
-    - name: Create security group "web_lb_rule"
-      ec2_group:
-          name: "web_lb_rule"
-          description: "Sec group for web LBs"
-          vpc_id: "{{ vpc_id }}"
-          rules:
-          - proto: tcp
-            ports:
-            - 80
-            - 443
-            cidr_ip: 0.0.0.0/0
-            rule_desc: allow all on port 80
-          - proto: tcp
-            ports:
-            - 22
-            cidr_ip: 0.0.0.0/0
-            rule_desc: allow all on port 22
-      register: result_sec_group
-
     - name: Build AZ-app dict
       include_tasks: plays/subnets.yml
       loop: "{{ app_instances }}"
@@ -97,11 +77,6 @@
           instance-state-name: [ "running" ]
       register: ec2_app_instances
 
-    - name: Append to nginx conf
-      set_fact: 
-        nginx_conf_dict: "{{ nginx_conf_dict | combine ( { item.placement.availability_zone : nginx_conf_dict[item.placement.availability_zone] | union([ item.private_dns_name ]) } ) }}" 
-      loop: "{{ ec2_app_instances.instances }}"
-
     # web lb ===
     - name: Check web instances 
       ec2_instance_info:
@@ -117,7 +92,7 @@
         region: "{{ region }}"
       when: web_instances | selectattr('seq_num', 'eq', item.tags.Name.split('_')[1]) | list | length == 0
       loop: "{{ ec2_web_instances.instances }}"
-    
+
     - name: Check web instances again for build inventory
       ec2_instance_info:
         filters:
@@ -131,7 +106,9 @@
           groupname: launched
           ansible_ssh_user: ec2-user
           ansible_ssh_private_key_file: "./{{ nginx_ssh_key }}.pem"
-          apps: "{{ nginx_conf_dict[k.placement.availability_zone] }}"
+          apps:  "{{ ec2_app_instances.instances | json_query(query) }}"
+      vars:
+          query: "[?placement.availability_zone=='{{ k.placement.availability_zone }}'].private_dns_name"
       loop: "{{ ec2_web_instances.instances }}"
       loop_control:
         loop_var: k

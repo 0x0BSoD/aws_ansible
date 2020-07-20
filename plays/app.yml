@@ -16,7 +16,7 @@
         instance_type: t2.micro
         region: "{{ region }}"
         key_name: "{{ nginx_ssh_key }}"
-        group_id: "{{ result_sec_group.group_id }}"
+        group_id: "{{ sg_id }}"
         vpc_subnet_id: "{{ item.subnet }}"
         wait: true
         user_data: |
@@ -41,15 +41,6 @@
         instance-state-name: [ "running" ]
     register: ec2
 
-  - name: Get VPC subnet info
-    ec2_vpc_subnet_info:
-      subnet_ids: "{{ ec2.instances[0].subnet_id }}"
-    register: subnet_info
-
-  - name: Append to nginx conf
-    set_fact: 
-      nginx_conf_dict: "{{ nginx_conf_dict | combine ( { subnet_info.subnets[0].availability_zone : nginx_conf_dict[subnet_info.subnets[0].availability_zone] | union([ ec2.instances[0].private_dns_name ]) } ) }}" 
-  
   when: ec2_info.instances | length == 0 or ec2_info.instances[0].state.name == "terminated"
 
 
